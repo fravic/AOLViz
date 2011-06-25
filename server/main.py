@@ -1,3 +1,4 @@
+import json
 import os
 
 import tornado.httpserver
@@ -24,9 +25,22 @@ class Application(tornado.web.Application):
 class MainHandler(tornado.web.RequestHandler):
   def get(self):
     self.render('index.html')
+
+def getdata(start, end):
+  sample = {};
+  sample[235235] = {'speed': 5, 'amplitude': 3, 'wavelength' : 1, 
+                    'queries': [{'color':0,'size':1, 'time':1000},
+                                {'color':0,'size':1, 'time':1001}, 
+                                {'color':1,'size':1, 'time':1002},]}
+  sample[238235] = {'speed': 2, 'amplitude': 3, 'wavelength' : 2, 
+                    'queries': [{'color':0,'size':1, 'time':1000},
+                                {'color':1,'size':2, 'time':1002}, 
+                                {'color':2,'size':1, 'time':1002},]}
+  return sample
+
 class AjaxHandler(tornado.web.RequestHandler):
   def get(self, start, end):
-    self.write('{}')
+    self.write(json.dumps(getdata(start, end)))
 
 def main():
   http_server = tornado.httpserver.HTTPServer(Application())
