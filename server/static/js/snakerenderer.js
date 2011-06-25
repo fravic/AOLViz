@@ -1,32 +1,24 @@
 function _SnakeRenderer(processing) {
 
+    processing.setup = function() {
+	processing.background(255, 255, 255);
+    }
+
     processing.draw = function() {
-	// determine center and max clock arm length
-	var centerX = processing.width / 2, centerY = processing.height / 2;
-	var maxArmLength = Math.min(centerX, centerY);
+	// We'll use processing as the run-loop for now
+	// A bit messy, but this is a hackathon!
+	Application.update();
 
-	function drawArm(position, lengthScale, weight) {
-	    processing.strokeWeight(weight);
-	    processing.line(centerX, centerY,
-			    centerX + Math.sin(position * 2 * Math.PI) * lengthScale * maxArmLength,
-			    centerY - Math.cos(position * 2 * Math.PI) * lengthScale * maxArmLength);
-	}
+	// Resize if necessary
+	processing.size(Application.getWidth(), Application.getHeight());
 
-	// erase background
-	processing.background(224);
-
-	var now = new Date();
-
-	// Moving hours arm by small increments
-	var hoursPosition = (now.getHours() % 12 + now.getMinutes() / 60) / 12;
-	drawArm(hoursPosition, 0.5, 5);
-
-	// Moving minutes arm by small increments
-	var minutesPosition = (now.getMinutes() + now.getSeconds() / 60) / 60;
-	drawArm(minutesPosition, 0.80, 3);
-
-	// Moving hour arm by second increments
-	var secondsPosition = now.getSeconds() / 60;
-	drawArm(secondsPosition, 0.90, 1);
+	$.each(Application.getSnakes(), function(idx, snake) {
+		var snakeNodes = snake.getNodes();
+		$.each(snakeNodes, function(idx, node) {
+			processing.fill(node.color.r, node.color.g, node.color.b);
+			processing.stroke(node.stroke.r, node.stroke.g, node.stroke.b);
+			processing.ellipse(node.pos.x, node.pos.y, node.rad * 2, node.rad * 2);
+		    });
+	    });
     };
 }
