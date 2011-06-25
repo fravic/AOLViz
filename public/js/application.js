@@ -11,7 +11,8 @@ function _Application() {
 		};
 	    });
 
-        $([]).preload();
+	var canvas = $("#main_canvas").get(0);
+	var processing = new Processing(canvas, _SnakeRenderer);
     }
 
     $(initApplication);
