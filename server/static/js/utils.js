@@ -18,3 +18,7 @@ function shuffle(arr) {
 	arr[j] = tempi;
     }
 }
+
+function addPoints(a, b) {
+    return {x:(a.x + b.x), y:(a.y + b.y)};
+}

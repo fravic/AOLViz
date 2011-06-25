@@ -1,10 +1,12 @@
 function _Application() {
 
     var PAGE_FETCH_URL = '/data/{start_time}/{end_time}';
+    var FETCH_TIME_BUFFER = 100;
 
     var _snakes = {};
     var _displayTime = 0;
     var _displayRate = 1;
+    var _fetchTime = -FETCH_TIME_BUFFER;
 
     /* Data interface */
 
@@ -26,6 +28,7 @@ function _Application() {
 		}
 		$.each(data.q, function(idx, query) {
 			var snakeNode = new _SnakeNode();
+			snakeNode.setParent(userSnake);
 			userSnake.addNode(snakeNode);
 		    });
 	    });

@@ -8,6 +8,7 @@ function _SnakeNode(time, pos, rad, color, stroke) {
     var _color = color ? color : {r:0, g:0, b:0};
     var _stroke = stroke ? stroke : _color;
 
+    var _parent = null;
     var _curRad = 0;
 
     this.getTime = function() { return _time; }
@@ -19,12 +20,14 @@ function _SnakeNode(time, pos, rad, color, stroke) {
     }
 
     this.getGlobalPos = function() {
-	// The global canvas center coord of this node
-	return _pos;
+	if (!_parent) {
+	    console.error("Parent not set on snake node!");
+	}
+	return addPoints(_pos, _parent.getGlobalPos());
     }
 
-    this.setPivotPos = function(pivotPos) {
-	
+    this.setParent = function(parent) {
+	_parent = parent;
     }
 
     this.update = function() {
@@ -47,6 +50,7 @@ function _Snake(speed, ampl, wave) {
     var _speed = speed ? speed : 1;
     var _ampl = ampl ? ampl : 1;
     var _wave = wave ? wave : 1;
+    var _pos = {x:0, y:0};
 
     var _nodes = [];
     var _nodeQueue = [];
@@ -56,6 +60,10 @@ function _Snake(speed, ampl, wave) {
     }
 
     this.getNodes = function() { return _nodes; }
+
+    this.getGlobalPos = function() {
+	return _pos;
+    }
 
     this.update = function() {
 	var len = _nodeQueue.length;
