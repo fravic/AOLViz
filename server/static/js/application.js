@@ -1,5 +1,9 @@
 function _Application() {
 
+    this.snakes = [];
+
+    /* Data handling */
+
     /* Initialization */
 
     function initApplication() {

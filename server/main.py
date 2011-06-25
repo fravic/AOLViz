@@ -15,7 +15,8 @@ class Application(tornado.web.Application):
                 (r'/data/([0-9]+)/([0-9]+)', AjaxHandler)]
     root_dir = os.path.dirname(__file__)
     settings = dict(
-      template_path = os.path.join(root_dir, '../public'),
+      template_path = os.path.join(root_dir, 'public'),
+      static_path = os.path.join(root_dir, 'static'),
       debug = True
     )
     tornado.web.Application.__init__(self, handlers, **settings)
