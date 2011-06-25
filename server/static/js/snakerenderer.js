@@ -1,3 +1,4 @@
+// Renderers are essentially static, due to Processing.js
 function _SnakeRenderer(processing) {
 
     processing.setup = function() {
@@ -15,9 +16,14 @@ function _SnakeRenderer(processing) {
 	$.each(Application.getSnakes(), function(idx, snake) {
 		var snakeNodes = snake.getNodes();
 		$.each(snakeNodes, function(idx, node) {
-			processing.fill(node.color.r, node.color.g, node.color.b);
-			processing.stroke(node.stroke.r, node.stroke.g, node.stroke.b);
-			processing.ellipse(node.pos.x, node.pos.y, node.rad * 2, node.rad * 2);
+			var pos = node.getGlobalPos();
+			var rad = node.getRadius();
+			var color = node.getColor();
+			var stroke = node.getStroke();
+
+			processing.fill(color.r, color.g, color.b);
+			processing.stroke(stroke.r, stroke.g, stroke.b);
+			processing.ellipse(pos.x, pos.y, rad * 2, rad * 2);
 		    });
 	    });
     };
