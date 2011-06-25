@@ -16,32 +16,32 @@ function _SnakeNode(time, pos, rad, color, stroke) {
     this.getStroke = function() { return _stroke; }
 
     this.getRadius = function() {
-	return _curRad;
+        return _curRad;
     }
 
     this.getGlobalPos = function() {
-	if (!_parent) {
-	    console.error("Parent not set on snake node!");
-	}
-	return addPoints(_pos, _parent.getGlobalPos());
+        if (!_parent) {
+            console.error("Parent not set on snake node!");
+        }
+        return addPoints(_pos, _parent.getGlobalPos());
     }
 
     this.setParent = function(parent) {
-	_parent = parent;
+        _parent = parent;
     }
 
     this.update = function() {
-	if (_curRad < _maxRad) {
-	    _curRad += RAD_RATE;
-	    _curRad = _curRad > _maxRad ? _maxRad : _curRad;
-	}
+        if (_curRad < _maxRad) {
+            _curRad += RAD_RATE;
+            _curRad = _curRad > _maxRad ? _maxRad : _curRad;
+        }
 
-	move();
+        move();
     }
 
     function move() {
-	_pos.x += 1;
-	_pos.y += 1;
+        _pos.x += 1;
+        _pos.y += 1;
     }
 }
 
@@ -56,31 +56,31 @@ function _Snake(speed, ampl, wave) {
     var _nodeQueue = [];
 
     this.addNode = function(snakeNode) {
-	_nodeQueue.push(snakeNode);
+        _nodeQueue.push(snakeNode);
     }
 
     this.getNodes = function() { return _nodes; }
 
     this.getGlobalPos = function() {
-	return _pos;
+        return _pos;
     }
 
     this.update = function() {
-	var len = _nodeQueue.length;
-	$.each(_nodeQueue, function(idx, node) {
-		if (idx >= len) return false;
-		if (node.getTime() < Application.getDisplayTime()) {
-		    _nodes.push(node);
-		    _nodeQueue.splice(idx, 1);
-		    len--;
-		}
-	    });
+        var len = _nodeQueue.length;
+        $.each(_nodeQueue, function(idx, node) {
+                if (idx >= len) return false;
+                if (node.getTime() < Application.getDisplayTime()) {
+                    _nodes.push(node);
+                    _nodeQueue.splice(idx, 1);
+                    len--;
+                }
+            });
 
-	$.each(_nodes, function(idx, node) {
-		node.update();
-	    });
+        $.each(_nodes, function(idx, node) {
+                node.update();
+            });
 
-	move();
+        move();
     }
 
     function move() {

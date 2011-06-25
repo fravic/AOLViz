@@ -11,37 +11,37 @@ function _Application() {
     /* Data interface */
 
     function pullNextPage() {
-	var url = PAGE_FETCH_URL
-	    .replace('{start_time}', 0)
-	    .replace('{end_time}', 1);
+        var url = PAGE_FETCH_URL
+            .replace('{start_time}', 0)
+            .replace('{end_time}', 1);
 					 
-	$.get(url, {}, pullResponse).error(pullError);
+        $.get(url, {}, pullResponse).error(pullError);
     }
 
     function pullResponse(response, textStatus) {
-	response = JSON.parse(response);
-	$.each(response, function(idx, data) {
-		var userSnake = _snakes[idx];
-		if (!userSnake) {
-		    _snakes[idx] = userSnake =
-			new _Snake(data.s, data.a, data.w);
-		}
-		$.each(data.q, function(idx, query) {
-			var snakeNode = new _SnakeNode();
-			snakeNode.setParent(userSnake);
-			userSnake.addNode(snakeNode);
-		    });
-	    });
+        response = JSON.parse(response);
+        $.each(response, function(idx, data) {
+                var userSnake = _snakes[idx];
+                if (!userSnake) {
+                    _snakes[idx] = userSnake =
+                        new _Snake(data.s, data.a, data.w);
+                }
+                $.each(data.q, function(idx, query) {
+                        var snakeNode = new _SnakeNode();
+                        snakeNode.setParent(userSnake);
+                        userSnake.addNode(snakeNode);
+                    });
+            });
     }
 
     function pullError() {
-	console.log("Error pulling new data");
+        console.log("Error pulling new data");
     }
 
     /* Rendering functions */
 
     this.getDisplayTime = function() {
-	return _displayTime;
+        return _displayTime;
     }
 
     this.getWidth = function() { return $("#main_canvas").width(); }
@@ -51,29 +51,29 @@ function _Application() {
     this.getSnakes = function() { return _snakes; }
 
     this.update = function() {
-	_displayTime += _displayRate;
+        _displayTime += _displayRate;
 
-	$.each(_snakes, function(idx, snake) {
-		snake.update();
-	    });
+        $.each(_snakes, function(idx, snake) {
+                snake.update();
+            });
     }
 
     /* Initialization */
 
     function initApplication() {
-	$(document).keypress(function(e) {
-		var button;
-		switch(String.fromCharCode(e.which)) {
-		default:
-		    return;
-		};
-	    });
+        $(document).keypress(function(e) {
+                var button;
+                switch(String.fromCharCode(e.which)) {
+                default:
+                    return;
+                };
+            });
 
-	var canvas = $("#main_canvas").get(0);
-	var processing = new Processing(canvas, _SnakeRenderer);
+        var canvas = $("#main_canvas").get(0);
+        var processing = new Processing(canvas, _SnakeRenderer);
 
-	pullNextPage();
-	Application.update();
+        pullNextPage();
+        Application.update();
     }
 
     $(initApplication);
