@@ -28,14 +28,14 @@ class MainHandler(tornado.web.RequestHandler):
 
 def getdata(start, end):
   sample = {};
-  sample[235235] = {'speed': 5, 'amplitude': 3, 'wavelength' : 1, 
-                    'queries': [{'color':0,'size':1, 'time':1000},
-                                {'color':0,'size':1, 'time':1001}, 
-                                {'color':1,'size':1, 'time':1002},]}
-  sample[238235] = {'speed': 2, 'amplitude': 3, 'wavelength' : 2, 
-                    'queries': [{'color':0,'size':1, 'time':1000},
-                                {'color':1,'size':2, 'time':1002}, 
-                                {'color':2,'size':1, 'time':1002},]}
+  sample[235235] = {'s': 5, 'a': 3, 'w' : 1, 
+                    'q': [{'c':[255,0,0],'s':1, 't':1000},
+                          {'c':[0,255,0],'s':1, 't':1001}, 
+                          {'c':[100,100,100],'s':1, 't':1002},]}
+  sample[238235] = {'s': 2, 'a': 3, 'w' : 2, 
+                    'q': [{'c':[250,0,250],'s':1, 't':1000},
+                          {'c':[100,0,100],'s':2, 't':1002}, 
+                          {'c':[235,2,135],'s':1, 't':1002},]}
   return sample
 
 class AjaxHandler(tornado.web.RequestHandler):
