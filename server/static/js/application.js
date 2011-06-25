@@ -1,16 +1,21 @@
 function _Application() {
 
+    this.FPS = 40;
+
     var PAGE_FETCH_URL = '/data/{start_time}/{end_time}';
-    var FETCH_TIME_BUFFER = 100;
+    var FETCH_TIME_BUFFER = 1000;
 
     var _snakes = {};
     var _displayTime = 0;
-    var _displayRate = 1;
+    var _displayRate = 1000;  // unixtime per second
     var _fetchTime = -FETCH_TIME_BUFFER;
+    var _buffering = false;
 
     /* Data interface */
 
     function pullNextPage() {
+        _buffering = true;
+
         var url = PAGE_FETCH_URL
             .replace('{start_time}', 0)
             .replace('{end_time}', 1);
@@ -32,6 +37,9 @@ function _Application() {
                         userSnake.addNode(snakeNode);
                     });
             });
+
+        _buffering = false;
+        $("#loading").hide()
     }
 
     function pullError() {
@@ -51,7 +59,17 @@ function _Application() {
     this.getSnakes = function() { return _snakes; }
 
     this.update = function() {
-        _displayTime += _displayRate;
+        if (_displayTime >= _fetchTime + FETCH_TIME_BUFFER) {
+            if (_buffering) {
+                // We're still trying to fetch the last frame!  Wait for it.
+                $("#loading").show();
+                return;
+            }
+            pullNextPage();
+            _fetchTime = _displayTime;
+        }
+
+        _displayTime += _displayRate / this.FPS;
 
         $.each(_snakes, function(idx, snake) {
                 snake.update();
@@ -72,7 +90,6 @@ function _Application() {
         var canvas = $("#main_canvas").get(0);
         var processing = new Processing(canvas, _SnakeRenderer);
 
-        pullNextPage();
         Application.update();
     }
 

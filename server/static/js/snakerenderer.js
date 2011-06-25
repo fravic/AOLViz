@@ -2,6 +2,8 @@
 function _SnakeRenderer(processing) {
 
     processing.setup = function() {
+        processing.frameRate(Application.FPS);
+        processing.size(Application.getWidth(), Application.getHeight());
         processing.background(255, 255, 255);
     }
 
@@ -10,8 +12,7 @@ function _SnakeRenderer(processing) {
         // A bit messy, but this is a hackathon!
         Application.update();
 
-        // Resize if necessary
-        processing.size(Application.getWidth(), Application.getHeight());
+        processing.background(255, 255, 255);
 
         $.each(Application.getSnakes(), function(idx, snake) {
                 var snakeNodes = snake.getNodes();
@@ -28,4 +29,3 @@ function _SnakeRenderer(processing) {
             });
     };
 }
-<
