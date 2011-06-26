@@ -1,8 +1,48 @@
+// Rounded Corners with Processing.js
+// By F1LT3R - http://groups.google.com/group/processingjs
+void roundedCorners(int left, int top, int width, int height, int roundness) {
+    beginShape();               
+    vertex(left + roundness, top);
+    vertex(left + width - roundness, top);
+    bezierVertex(left + width - roundness, top,
+                 left + width, top,
+                 left + width, top + roundness);
+                          
+    vertex(left + width, top + roundness);
+    vertex(left + width, top + height - roundness);
+    bezierVertex(left + width, top + height - roundness,
+                 left + width, top + height,
+                 left + width - roundness, top + height);
+        
+    vertex(left + width - roundness, top + height);
+    vertex(left + roundness, top + height);        
+    bezierVertex(left + roundness, top + height,
+                 left, top + height,
+                 left, top + height - roundness);
+        
+    vertex(left, top + height - roundness);
+    vertex(left, top + roundness);
+    bezierVertex(left, top + roundness,
+                 left, top,
+                 left + roundness, top);        
+    endShape();
+}
+
+
+
 HashMap snakes = new HashMap();
 
 int STATE_ALIVE = 0;
 int STATE_DYING = 1;
 int STATE_DEAD = 2;
+int STATE_STOPPED = 3;
+
+float TARG_STOP_FADE = 0.75;
+float TARG_STOP_FADE_RATE = 0.15;
+
+SnakeNode globalStopNode = null;
+bool globalStop = false;
+float globalFade = 0;
 
 void setup() {
     size(Application.getWidth(), Application.getHeight());
@@ -15,6 +55,15 @@ void draw() {
 
     background(#FFFFFF);
 
+    // Fade out during stop
+    if (globalStop && globalFade < TARG_STOP_FADE) {
+        globalFade += TARG_STOP_FADE_RATE;
+        globalFade = globalFade > TARG_STOP_FADE ? TARG_STOP_FADE : globalFade;
+    } else if (!globalStop && globalFade > 0) {
+        globalFade -= TARG_STOP_FADE_RATE;
+        globalFade = globalFade < 0 ? 0 : globalFade;
+    }
+    
     Iterator i = snakes.entrySet().iterator();
     while (i.hasNext()) {
         Snake snake = (Snake)i.next().getValue();
@@ -26,6 +75,25 @@ void draw() {
     while (i.hasNext()) {
         ((Snake)i.next().getValue()).cleanup();
     }
+
+    if (globalStop) {
+        drawGlobalStopNode();
+    }
+}
+
+void drawGlobalStopNode() {
+    const dialogWidth = 300;
+    const dialogHeight = 100;
+    const dialogRounding = 5;
+
+    SnakeNode n = globalStopNode;
+
+    fill(#FFFFFF);
+    stroke(#000000);
+    strokeWeight(1);
+    roundedCorners(n.xC, n.yC, dialogWidth, dialogHeight, dialogRounding);
+
+    n.draw();
 }
 
 void addSnakeIfNotExists(int id, int speed, int amp, int wave) {
@@ -50,7 +118,7 @@ class SnakeNode {
 
     Snake parent;
     int state = STATE_ALIVE;
-    int x = 0, y = 0, time = 0;
+    int x = 0, y = 0, xC = 0, yC = 0, time = 0;
     float targRad = 0, curRad = 0;
     color col = #000000;
 
@@ -66,7 +134,8 @@ class SnakeNode {
     }
 
     void update() {
-        if (state == STATE_DEAD) {
+        if (state == STATE_DEAD ||
+            state == STATE_STOPPED) {
             return;
         }
         if (state == STATE_DYING) {
@@ -74,9 +143,11 @@ class SnakeNode {
             if (curRad < 0) {
                 state = STATE_DEAD;
             }
-        } else if (curRad < targRad) {
-            curRad += RAD_RATE;
-            curRad = curRad > targRad ? targRad : curRad;
+        } else {
+            if (curRad < targRad) {
+                curRad += RAD_RATE;
+                curRad = curRad > targRad ? targRad : curRad;
+            }
         }
         move();
     }
@@ -104,14 +175,30 @@ class SnakeNode {
         xC = (x + parent.x) % Application.getWidth();
         yC = (y + parent.y) % Application.getHeight();
 
-        fill(col);
+        if (globalFade > 0 && state != STATE_STOPPED) {
+            color fade = lerpColor(col, #FFFFFF, globalFade);
+            fill(fade);
+        } else {
+            fill(col);
+        }
 
-        if (mouseOver(xC, yC)) {
+        if (mouseOver(xC, yC) && state != STATE_DYING) {
             strokeWeight(2);
             stroke(#000000);
-            fill((col + #FFFFFF) / 2);
+
+            Application.showQuery(parent.userid, time);
+
+            globalStop = true;
+            globalStopNode = this;
+            parent.state = state = STATE_STOPPED;
         } else {
             noStroke();
+
+            if (state == STATE_STOPPED) {
+                Application.hideQuery();
+                parent.state = state = STATE_ALIVE;
+                globalStop = false;
+            }
         }
 
         ellipse(xC, yC, curRad*2, curRad*2);
@@ -136,7 +223,7 @@ class Snake {
 
     Snake(int userid, float speed, float ampl, float wave) {
         this.userid = userid;
-        this.speed = speed * SPEED_MULTIPLIER;
+        this.speed = speed * SPEED_MULTIPLIER + Math.random(); // jitter
         this.ampl = ampl * AMP_MULTIPLIER;
         this.wave = wave * WAVE_MULTIPLIER;
         this.timeToDie = LIFESPAN_REGEN;
@@ -169,6 +256,12 @@ class Snake {
     }
         
     void update() {
+        if (state == STATE_STOPPED || 
+            state  == STATE_DEAD ||
+            globalStop) {
+            return;
+        }
+
         move();
 
         if (!nodeQueue.isEmpty()) {
