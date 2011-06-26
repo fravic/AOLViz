@@ -22,31 +22,41 @@ class DataServer(object):
       id, speed, amp, wave = [int(x) for x in line.strip().split('\t')]
       self.users[id] = {'s':speed, 'a':amp, 'w':wave}
     # ids
-    self.queries = defaultdict(lambda:[])
+    self.queries = defaultdict(lambda:defaultdict(lambda:{}))
     _queries = open('../data/question_post_aes')
     for line in _queries:
       id, ts, R, G, B, size, query  = line.split('\t')
       id = int(id); ts = int(ts); R=int(R); G=int(G); B=int(B); size=int(size)
-      self.queries[int(ts)/self._BUCKET].append( (id, ts, (R,G,B), size, query) )
+      self.queries[int(ts)/self._BUCKET][ts][id]= ((R,G,B), size, query)
 
   def getdata(self, start, end):
     ret = {}
     _start = int(start/self._BUCKET)
     _end = int(ceil(float(end)/self._BUCKET))
     for i in range(_start, _end+1):
-      for (id, ts, col, size, _) in self.queries.get(i, []):
-        if start < ts and ts < end:
-          if not ret.has_key(id):
-            ret[id] = self.users[id]
-            ret[id]['q'] = []
-          ret[id]['q'].append({'c':col, 's':size, 't':ts})
+      for ts, foo in self.queries[i].items():
+        for id, stuff in foo.items():
+          col, size, query = stuff
+          if start < ts and ts < end:
+            if not ret.has_key(id):
+              ret[id] = self.users[id]
+              ret[id]['q'] = []
+            ret[id]['q'].append({'c':col, 's':size, 't':ts})
     return ret
+
+  def getquery(self, uid, ts):
+    data= self.queries.get(ts/self._BUCKET, {}).get(ts,{}).get(uid,None)
+    if data is not None:
+      col, size, query = data
+      return query
+    return []
 dataserver = DataServer()
 
 class Application(tornado.web.Application):
   def __init__(self):
     handlers = [(r'/', MainHandler),
-                (r'/data/([0-9]+)/([0-9]+)', AjaxHandler)]
+                (r'/data/([0-9]+)/([0-9]+)', AjaxHandler),
+                (r'/query/([0-9]+)/([0-9]+)', AjaxHandler)]
     root_dir = os.path.dirname(__file__)
     settings = dict(
       template_path = os.path.join(root_dir, 'public'),
@@ -64,6 +74,12 @@ class AjaxHandler(tornado.web.RequestHandler):
     start = int(start)
     end = int(end)
     self.write(json.dumps(dataserver.getdata(start, end)))
+
+class QueryHandler(tornado.web.RequestHandler):
+  def get(self, uid, ts):
+    uid = int(uid)
+    ts = int(ts)
+    self.write(json.dumps(dataserver.getquery(uid, ts)))
 
 def main():
   http_server = tornado.httpserver.HTTPServer(Application())
