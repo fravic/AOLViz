@@ -1,7 +1,7 @@
 from web import get_files
 from math import log
 import time
-qword = {'how':1, 'what':2, 'where':3, 'who':4, 'why':5, 'when':6, 'should':7, 'would':8, 'could':9}
+qword = {'how':1, 'what':2, 'where':3, 'who':4, 'why':5, 'could':6, 'should':7, 'would':8, 'when':9}
 col1 = ["E41A1C", "377EB8", "4DAF4A", "984EA3", "FF7F00", "FFFF33", "A65628", "F781BF", "999999"]
 col2 = ["842326", "005589", "005700", "7E0187", "693F00", "4B4B00", "713900", "8B0067", "414E00"]
 

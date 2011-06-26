@@ -27,8 +27,8 @@ class DataServer(object):
     for line in _queries:
       id, ts, R, G, B, size, query, percents  = line.strip().split('\t')
       id = int(id); ts = int(ts); R=int(R); G=int(G); B=int(B); size=int(size)
-      percents = eval(percents)
-      self.queries[int(ts)/self._BUCKET][ts][id]= ((R,G,B), size, query, percents)
+      #percents = eval(percents)
+      self.queries[int(ts)/self._BUCKET][ts][id]= ((R,G,B), size, query) #, percents)
 
   def getdata(self, start, end):
     ret = {}
