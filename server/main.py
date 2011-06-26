@@ -25,7 +25,7 @@ class DataServer(object):
     self.queries = defaultdict(lambda:defaultdict(lambda:{}))
     _queries = open('../data/question_post_aes')
     for line in _queries:
-      id, ts, R, G, B, size, query  = line.split('\t')
+      id, ts, R, G, B, size, query  = line.strip().split('\t')
       id = int(id); ts = int(ts); R=int(R); G=int(G); B=int(B); size=int(size)
       self.queries[int(ts)/self._BUCKET][ts][id]= ((R,G,B), size, query)
 
@@ -56,7 +56,7 @@ class Application(tornado.web.Application):
   def __init__(self):
     handlers = [(r'/', MainHandler),
                 (r'/data/([0-9]+)/([0-9]+)', AjaxHandler),
-                (r'/query/([0-9]+)/([0-9]+)', AjaxHandler)]
+                (r'/query/([0-9]+)/([0-9]+)', QueryHandler)]
     root_dir = os.path.dirname(__file__)
     settings = dict(
       template_path = os.path.join(root_dir, 'public'),
