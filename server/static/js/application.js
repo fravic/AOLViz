@@ -32,7 +32,7 @@ function _Application() {
                 var renderer = Processing.getInstanceById('main_canvas');
                 renderer.addSnakeIfNotExists(userid, data.s, data.a, data.w);
                 $.each(data.q, function(idx, query) {
-                        renderer.addSnakeNode(userid, query.t, query.s, query.c);
+                        renderer.addSnakeNode(userid, query.t, query.s, query.c[0], query.c[1], query.c[2]);
                     });
             });
 

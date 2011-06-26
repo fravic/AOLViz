@@ -35,9 +35,10 @@ void addSnakeIfNotExists(int id, int speed, int amp, int wave) {
     }
 }
 
-void addSnakeNode(int id, int time, float rad, color col) {
+void addSnakeNode(int id, int time, float rad, int r, int g, int b) {
     Snake snake = snakes.get(id);
-    SnakeNode node = new SnakeNode(snake, time, rad, #000000);
+    SnakeNode node = new SnakeNode(snake, time, rad);
+    node.setColor(r, g, b);
     snake.addNode(node);
 }
 
@@ -53,22 +54,27 @@ class SnakeNode {
     float targRad = 0, curRad = 0;
     color col = #000000;
 
-    SnakeNode(Snake parent, int time, float rad, color col) {
+    SnakeNode(Snake parent, int time, float rad) {
         this.parent = parent;
         this.time = time;
-        this.col = col;
         this.str = str;
         this.targRad = rad * SIZE_MULTIPLIER;
     }
 
+    void setColor(int r, int g, int b) {
+        col = color(r, g, b);
+    }
+
     void update() {
+        if (state == STATE_DEAD) {
+            return;
+        }
         if (state == STATE_DYING) {
             curRad -= RAD_RATE;
             if (curRad < 0) {
                 state = STATE_DEAD;
             }
-        }
-        else if (curRad < targRad) {
+        } else if (curRad < targRad) {
             curRad += RAD_RATE;
             curRad = curRad > targRad ? targRad : curRad;
         }
@@ -91,6 +97,10 @@ class SnakeNode {
     }
 
     void draw() {
+        if (state == STATE_DEAD) {
+            return;
+        }
+
         xC = (x + parent.x) % Application.getWidth();
         yC = (y + parent.y) % Application.getHeight();
 
@@ -98,7 +108,7 @@ class SnakeNode {
 
         if (mouseOver(xC, yC)) {
             strokeWeight(2);
-            stroke(str);
+            stroke(#000000);
             fill((col + #FFFFFF) / 2);
         } else {
             noStroke();
@@ -109,8 +119,11 @@ class SnakeNode {
 }
 
 class Snake {    
-    int LIFESPAN_REGEN = 500;
-    int AMP_MULTIPLIER = 1;
+    int LIFESPAN_REGEN = 1000;
+
+    float AMP_MULTIPLIER = 1.5;
+    float SPEED_MULTIPLIER = 0.8;
+    float WAVE_MULTIPLIER = 1.2;
 
     int state = STATE_ALIVE;
     int x = 0, y = 0, initX = 0, nextNodeX = 0;
@@ -123,13 +136,13 @@ class Snake {
 
     Snake(int userid, float speed, float ampl, float wave) {
         this.userid = userid;
-        this.speed = speed;
+        this.speed = speed * SPEED_MULTIPLIER;
         this.ampl = ampl * AMP_MULTIPLIER;
-        this.wave = wave;
+        this.wave = wave * WAVE_MULTIPLIER;
         this.timeToDie = LIFESPAN_REGEN;
 
-        initX = Math.random()*Application.getWidth();
-        y = Math.random()*Application.getHeight();
+        initX = Math.random() * Application.getWidth();
+        y = (Math.random() + Math.random()) / 2 * Application.getHeight();
     }
 
     void addNode(SnakeNode node) {
