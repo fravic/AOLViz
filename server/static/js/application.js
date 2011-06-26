@@ -5,8 +5,8 @@ function _Application() {
     var PAGE_FETCH_URL = '/data/{start_time}/{end_time}';
     var FETCH_TIME_BUFFER = 1000;
 
-    var _displayTime = 0;
-    var _displayRate = 1000;  // unixtime per second
+    var _displayTime = 1141264807;
+    var _displayRate = 10;  // unixtime per second
     var _fetchTime = -FETCH_TIME_BUFFER;
     var _buffering = false;
 
@@ -16,8 +16,8 @@ function _Application() {
         _buffering = true;
 
         var url = PAGE_FETCH_URL
-            .replace('{start_time}', 0)
-            .replace('{end_time}', 1);
+            .replace('{start_time}', 1141264807)
+            .replace('{end_time}', 1141284807);
 					 
         $.get(url, {}, pullResponse).error(pullError);
     }
@@ -28,7 +28,7 @@ function _Application() {
                 var renderer = Processing.getInstanceById('main_canvas');
                 renderer.addSnakeIfNotExists(userid, data.s, data.a, data.w);
                 $.each(data.q, function(idx, query) {
-                        renderer.addSnakeNode(userid, data.t, data.s, data.c, data.c);
+                        renderer.addSnakeNode(userid, query.t, query.s, query.c, query.c);
                     });
             });
 

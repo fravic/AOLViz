@@ -13,7 +13,7 @@ from tornado.options import define, options
 define('port', default=8888, help='run on the given port', type=int)
 
 class DataServer(object):
-  _BUCKET = 60
+  _BUCKET = 3600
   def __init__(self):
     # users
     self.users = {}
@@ -31,7 +31,7 @@ class DataServer(object):
   def getdata(self, start, end):
     ret = {}
     _start = int(start/self._BUCKET)
-    _end = ceil(float(end)/self._BUCKET)
+    _end = int(ceil(float(end)/self._BUCKET))
     for i in range(_start, _end+1, self._BUCKET):
       for (id, ts, col, size) in self.queries.get(i, []):
         if start < ts and ts < end:
@@ -72,3 +72,4 @@ def main():
 
 if __name__ == '__main__':
   main()     
+

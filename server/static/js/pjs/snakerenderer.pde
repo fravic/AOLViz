@@ -21,7 +21,7 @@ void draw() {
 
 void addSnakeIfNotExists(int id, speed, amp, wave) {
      if (!snakes.containsKey(id)) {
-          Snake snake = new Snake();
+          Snake snake = new Snake(speed, amp, wave);
           snakes.put(id, snake);
      }
 }
@@ -33,25 +33,21 @@ void addSnakeNode(int id, int time, float rad, color col, color stroke) {
 }
 
 class SnakeNode {
-    float RAD_RATE = 2;
+    float RAD_RATE = 0.2;
+    float RAD_MOUSE_PADDING = 1;
 
+    Snake parent;
     int x = 0, y = 0, time = 0;
     float maxRad = 0, curRad = 0;
     color col = #000000, str = #000000;
 
     SnakeNode(Snake parent, int time, float rad, color col, color str) {
+        this.parent = parent;
+        this.time = time;
                   this.col = col;
                   this.str = str;
                   this.maxRad = rad;
-    }
-
-    void mouseOver() {
-    }
-
-    void mouseOut() {
-    }
-    
-    void mouseClicked() {
+                  str = #FF0000;
     }
 
     void update() {
@@ -64,34 +60,69 @@ class SnakeNode {
     }
 
     void move() {
-        x += 5;
-        y += 5;
+        y = 25 * parent.ampl * Math.sin(1/(parent.wave * 50) *
+                                               (x + parent.x + parent.initX));
+    }
+
+    boolean mouseOver(int xC, int yC) {
+    dx = xC - mouseX;
+    dy = yC - mouseY;
+    dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist <= curRad + RAD_MOUSE_PADDING) {
+      return true;
+    }
+        return false;
     }
 
     void draw() {
+         xC = (x + parent.x) % Application.getWidth();
+         yC = (y + parent.y) % Application.getHeight();
          fill(col);
-         stroke(str);
-         ellipse(x, y, curRad*2, curRad*2);
+
+         if (mouseOver(xC, yC)) {
+           strokeWeight(2);
+           stroke(str);
+           fill((col + #FFFFFF) / 2);
+         } else {
+           noStroke();
+         }
+
+         ellipse(xC, yC, curRad*2, curRad*2);
     }
 }
 
 class Snake {
-      int x = 0, y = 0;
+      int x = 0, y = 0, initX = 0, nextNodeX = 0;
       float speed, ampl, wave;
       
       ArrayList nodes = new ArrayList();
+      ArrayList nodeQueue = new ArrayList();
 
       Snake(float speed, float ampl, float wave) {
                   this.speed = speed;
                   this.ampl = ampl;
                   this.wave = wave;
+
+                  initX = Math.random()*Application.getWidth();
+                  y = Math.random()*Application.getHeight();
       }
 
       void addNode(SnakeNode node) {
-           nodes.add(node);
+           node.x = nextNodeX - node.maxRad;
+           nextNodeX -= node.maxRad * 2;
+
+           nodeQueue.add(node);
       }
 
       void update() {
+      if (!nodeQueue.isEmpty()) {
+        Snake nextNode = nodeQueue.get(0);
+        if (nextNode.time < Application.getDisplayTime()) {
+           nodes.add(nextNode);
+           nodeQueue.remove(0);
+        }
+}
+
           move();
 
           for (int i = 0; i < nodes.size(); i++) {
@@ -100,6 +131,7 @@ class Snake {
       }
 
       void move() {
+            x += speed;
       }
 
       void draw() {
