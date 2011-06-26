@@ -5,9 +5,8 @@ function _Application() {
     var PAGE_FETCH_URL = '/data/{start_time}/{end_time}';
     var FETCH_TIME_BUFFER = 1000;
 
-    var _snakes = {};
-    var _displayTime = 0;
-    var _displayRate = 1000;  // unixtime per second
+    var _displayTime = 1141264807;
+    var _displayRate = 10;  // unixtime per second
     var _fetchTime = -FETCH_TIME_BUFFER;
     var _buffering = false;
 
@@ -17,24 +16,19 @@ function _Application() {
         _buffering = true;
 
         var url = PAGE_FETCH_URL
-            .replace('{start_time}', 0)
-            .replace('{end_time}', 1);
+            .replace('{start_time}', 1141264807)
+            .replace('{end_time}', 1141284807);
 					 
         $.get(url, {}, pullResponse).error(pullError);
     }
 
     function pullResponse(response, textStatus) {
         response = JSON.parse(response);
-        $.each(response, function(idx, data) {
-                var userSnake = _snakes[idx];
-                if (!userSnake) {
-                    _snakes[idx] = userSnake =
-                        new _Snake(data.s, data.a, data.w);
-                }
+        $.each(response, function(userid, data) {
+                var renderer = Processing.getInstanceById('main_canvas');
+                renderer.addSnakeIfNotExists(userid, data.s, data.a, data.w);
                 $.each(data.q, function(idx, query) {
-                        var snakeNode = new _SnakeNode();
-                        snakeNode.setParent(userSnake);
-                        userSnake.addNode(snakeNode);
+                        renderer.addSnakeNode(userid, query.t, query.s, query.c, query.c);
                     });
             });
 
@@ -56,8 +50,6 @@ function _Application() {
 
     this.getHeight = function() { return $("#main_canvas").height(); }
 
-    this.getSnakes = function() { return _snakes; }
-
     this.update = function() {
         if (_displayTime >= _fetchTime + FETCH_TIME_BUFFER) {
             if (_buffering) {
@@ -70,27 +62,11 @@ function _Application() {
         }
 
         _displayTime += _displayRate / this.FPS;
-
-        $.each(_snakes, function(idx, snake) {
-                snake.update();
-            });
     }
 
     /* Initialization */
 
     function initApplication() {
-        $(document).keypress(function(e) {
-                var button;
-                switch(String.fromCharCode(e.which)) {
-                default:
-                    return;
-                };
-            });
-
-        var canvas = $("#main_canvas").get(0);
-        var processing = new Processing(canvas, _SnakeRenderer);
-
-        Application.update();
     }
 
     $(initApplication);
