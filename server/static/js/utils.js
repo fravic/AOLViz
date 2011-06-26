@@ -22,3 +22,7 @@ function shuffle(arr) {
 function addPoints(a, b) {
     return {x:(a.x + b.x), y:(a.y + b.y)};
 }
+
+function slog(str) {
+    console.log(str);
+}

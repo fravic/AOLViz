@@ -33,6 +33,8 @@ void addSnakeNode(int id, int time, float rad, color col, color stroke) {
 }
 
 class SnakeNode {
+    int SIZE_MULTIPLIER = 5;
+
     float RAD_RATE = 0.2;
     float RAD_MOUSE_PADDING = 1;
 
@@ -46,7 +48,7 @@ class SnakeNode {
         this.time = time;
                   this.col = col;
                   this.str = str;
-                  this.maxRad = rad;
+                  this.maxRad = rad * SIZE_MULTIPLIER;
                   str = #FF0000;
     }
 
@@ -60,7 +62,7 @@ class SnakeNode {
     }
 
     void move() {
-        y = 25 * parent.ampl * Math.sin(1/(parent.wave * 50) *
+        y = 25 * parent.ampl * Math.sin(1/(Math.max(parent.wave, 1) * 50) *
                                                (x + parent.x + parent.initX));
     }
 
@@ -77,6 +79,7 @@ class SnakeNode {
     void draw() {
          xC = (x + parent.x) % Application.getWidth();
          yC = (y + parent.y) % Application.getHeight();
+
          fill(col);
 
          if (mouseOver(xC, yC)) {
