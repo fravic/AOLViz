@@ -66,8 +66,10 @@ void drawGlobalStopNode() {
     SnakeNode n = globalStopNode;
 
     int dialogX = n.xC, dialogY = n.yC;
+    boolean moveX = false;
     if (dialogX > Application.getWidth() - 270) {
         dialogX = Application.getWidth() - 270;
+        moveX = true;
     }
     if (dialogY > Application.getHeight() - 100) {
         dialogY = Application.getHeight() - 100;
@@ -77,6 +79,12 @@ void drawGlobalStopNode() {
     stroke(#000000);
     strokeWeight(1);
     roundedCorners(dialogX, dialogY, dialogWidth, dialogHeight, dialogRounding);
+
+    if (!moveX) {
+        fill(#DDDDDD);
+        noStroke();
+        rect(dialogX + 5, dialogY + 5, 20, dialogHeight - 10);
+    }
 
     n.draw();
 }
