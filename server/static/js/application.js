@@ -5,14 +5,15 @@ function _Application() {
 
     var PAGE_FETCH_URL = '/data/{start_time}/{end_time}';
     var QUERY_FETCH_URL = '/query/{uid}/{time}';
-    var DATA_START_TIME = 1143000000;
-    var DATA_END_TIME = 1141800000;
+    var DATA_START_TIME = 1142300000;
+    var DATA_END_TIME = 1148000000;
     var FETCH_TIME_BUFFER = 2000;
-    var INITIAL_BUFFER = 600;
+    var INITIAL_BUFFER = 1400;
 
     var _displayTime, _fetchTime;
     var _buffering = false;
     var _firstLoad = true;
+    var _paused = false;
     var _lastReset;
 
     var _descOverlayX, _descOverlayY, _descOverlayColor;
@@ -20,7 +21,7 @@ function _Application() {
     /* Data interface */
 
     function setStartTime(stime) {
-        var minResetInterval = 1000;
+        var minResetInterval = 2000;
         var time = (new Date()).getTime();
         if (time - _lastReset < minResetInterval) {
             return;
@@ -142,6 +143,10 @@ function _Application() {
     this.getHeight = function() { return $("#main_canvas").height(); }
 
     this.update = function() {
+        if (_paused) {
+            return;
+        }
+
         if (_displayTime >= _fetchTime + FETCH_TIME_BUFFER) {
             if (_buffering) {
                 // We're still trying to fetch the last frame!  Wait for it.
@@ -152,7 +157,10 @@ function _Application() {
         }
 
         _displayTime += this.DISPLAY_RATE / this.FPS;
-        $("#time_slider").slider('value', _displayTime);
+        var perc = Math.floor((_displayTime - DATA_START_TIME) / (DATA_END_TIME - DATA_START_TIME));
+        //        $("#time_slider").slider('value', Math.floor(perc*100));
+        var date = new Date(_displayTime*1000);
+        $("#time_text").html(date.toDateString());
     }
 
     $(window).resize(function() {
@@ -165,16 +173,25 @@ function _Application() {
     
     function initApplication() {
         // For demo purposes, you might want to hardcode a start time
-        var startTime = Math.floor(Math.random() * (DATA_START_TIME - DATA_END_TIME) + DATA_START_TIME);
+        var startPerc = Math.floor(Math.random() * 70);
+        var startTime = Math.floor((startPerc/100) * (DATA_END_TIME - DATA_START_TIME) + DATA_START_TIME);
+
         setStartTime(startTime);
 
         $("#time_slider").slider({
-                    min:DATA_START_TIME,
-                    max:DATA_END_TIME,
-                    value:startTime,
-                    step:100,
-                    change:function(event, ui) {
-                    setStartTime(ui.value);
+                range:"min",
+                    min:0,
+                    max:100,
+                    value:startPerc,
+                    step:1,
+                    start:function(event, ui) {
+                    _paused = true;
+                    },
+                    stop:function(event, ui) {
+                    var perc = ui.value;
+                    var time = Math.floor((perc/100) * (DATA_END_TIME - DATA_START_TIME) + DATA_START_TIME);
+                    setStartTime(time);
+                    _paused = false;
                 }
             });
     }

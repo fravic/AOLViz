@@ -83,7 +83,7 @@ void drawGlobalStopNode() {
 
 void drawBorder() {
     const normalBorder = 15;
-    const thickBorder = 40;
+    const thickBorder = 30;
 
     fill(#FFFFFF);
     noStroke();
@@ -267,7 +267,7 @@ class Snake {
                     alive = true;
                 }
             }    
-            if (!alive) {
+            if (!alive) {       
                 nodes.clear();
                 // This causes segfaults  :(
                 // snakes.remove(userid);

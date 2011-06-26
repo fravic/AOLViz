@@ -56,7 +56,15 @@ HTML, BODY {
     position:absolute;
     right:30px;
     bottom:6px;
-    font-size:12px;
+    font-size:10px;
     width:500px;
     height:5px;
+}
+
+#time_text {
+    position:absolute;
+    bottom:3px;
+    right:575px;
+    font-weight:bold;
+    font-size:10px;
 }
