@@ -14,6 +14,7 @@ function _Application() {
     var _buffering = false;
     var _firstLoad = true;
     var _paused = false;
+    var _loadingQuery = false;
     var _lastReset;
 
     var _descOverlayX, _descOverlayY, _descOverlayColor;
@@ -86,14 +87,20 @@ function _Application() {
             .replace('{uid}', uid)
             .replace('{time}', time);
                                           
+        _loadingQuery = true;
         $.get(url, {}, queryResponse).error(queryError);
     }
 
     this.hideQuery = function() {
         $("#desc_overlay").hide();
+        _loadingQuery = false;
     }
 
     function queryResponse(response, textStatus) {
+        if (!_loadingQuery) {
+            // Interrupted, cancel
+            return;
+        }
         response = JSON.parse(response);
         // Fake some data for now... fill this in later
         var disp = {text:response};
@@ -103,6 +110,8 @@ function _Application() {
         $("#desc_overlay").css('top', _descOverlayY + 'px');
         $("#desc_overlay").html(makeQuestionDiv(disp.text));
         $("#desc_overlay").show();
+
+        _loadingQuery = false;
     }
 
     function queryError() {
