@@ -1,35 +1,44 @@
 HashMap snakes = new HashMap();
 
+int STATE_ALIVE = 0;
+int STATE_DYING = 1;
+int STATE_DEAD = 2;
+
 void setup() {
-     size(Application.getWidth(), Application.getHeight());
-     frameRate(24);
-     background(#FFFFFF);
+    size(Application.getWidth(), Application.getHeight());
+    frameRate(24);
+    background(#FFFFFF);
 }
 
 void draw() {
-     Application.update();
+    Application.update();
 
-     background(#FFFFFF);
+    background(#FFFFFF);
 
-     Iterator i = snakes.entrySet().iterator();
-     while (i.hasNext()) {
-         Snake snake = (Snake)i.next();
-         snake.getValue().update();
-         snake.getValue().draw();
-     }
+    Iterator i = snakes.entrySet().iterator();
+    while (i.hasNext()) {
+        Snake snake = (Snake)i.next().getValue();
+        snake.update();
+        snake.draw();
+    }
+
+    i = snakes.entrySet().iterator();
+    while (i.hasNext()) {
+        ((Snake)i.next().getValue()).cleanup();
+    }
 }
 
-void addSnakeIfNotExists(int id, speed, amp, wave) {
-     if (!snakes.containsKey(id)) {
-          Snake snake = new Snake(speed, amp, wave);
-          snakes.put(id, snake);
-     }
+void addSnakeIfNotExists(int id, int speed, int amp, int wave) {
+    if (!snakes.containsKey(id)) {
+        Snake snake = new Snake(id, speed, amp, wave);
+        snakes.put(id, snake);
+    }
 }
 
-void addSnakeNode(int id, int time, float rad, color col, color stroke) {
-     Snake snake = snakes.get(id);
-     SnakeNode node = new SnakeNode(snake, time, rad, #000000, #000000);
-     snake.addNode(node);
+void addSnakeNode(int id, int time, float rad, color col) {
+    Snake snake = snakes.get(id);
+    SnakeNode node = new SnakeNode(snake, time, rad, #000000);
+    snake.addNode(node);
 }
 
 class SnakeNode {
@@ -39,107 +48,149 @@ class SnakeNode {
     float RAD_MOUSE_PADDING = 1;
 
     Snake parent;
+    int state = STATE_ALIVE;
     int x = 0, y = 0, time = 0;
-    float maxRad = 0, curRad = 0;
-    color col = #000000, str = #000000;
+    float targRad = 0, curRad = 0;
+    color col = #000000;
 
-    SnakeNode(Snake parent, int time, float rad, color col, color str) {
+    SnakeNode(Snake parent, int time, float rad, color col) {
         this.parent = parent;
         this.time = time;
-                  this.col = col;
-                  this.str = str;
-                  this.maxRad = rad * SIZE_MULTIPLIER;
-                  str = #FF0000;
+        this.col = col;
+        this.str = str;
+        this.targRad = rad * SIZE_MULTIPLIER;
     }
 
     void update() {
-        if (curRad < maxRad) {
-            curRad += RAD_RATE;
-            curRad = curRad > maxRad ? maxRad : curRad;
+        if (state == STATE_DYING) {
+            curRad -= RAD_RATE;
+            if (curRad < 0) {
+                state = STATE_DEAD;
+            }
         }
-
-         move();
+        else if (curRad < targRad) {
+            curRad += RAD_RATE;
+            curRad = curRad > targRad ? targRad : curRad;
+        }
+        move();
     }
 
     void move() {
         y = 25 * parent.ampl * Math.sin(1/(Math.max(parent.wave, 1) * 50) *
-                                               (x + parent.x + parent.initX));
+                                        (x + parent.x + parent.initX));
     }
 
     boolean mouseOver(int xC, int yC) {
-    dx = xC - mouseX;
-    dy = yC - mouseY;
-    dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist <= curRad + RAD_MOUSE_PADDING) {
-      return true;
-    }
+        dx = xC - mouseX;
+        dy = yC - mouseY;
+        dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist <= curRad + RAD_MOUSE_PADDING) {
+            return true;
+        }
         return false;
     }
 
     void draw() {
-         xC = (x + parent.x) % Application.getWidth();
-         yC = (y + parent.y) % Application.getHeight();
+        xC = (x + parent.x) % Application.getWidth();
+        yC = (y + parent.y) % Application.getHeight();
 
-         fill(col);
+        fill(col);
 
-         if (mouseOver(xC, yC)) {
-           strokeWeight(2);
-           stroke(str);
-           fill((col + #FFFFFF) / 2);
-         } else {
-           noStroke();
-         }
+        if (mouseOver(xC, yC)) {
+            strokeWeight(2);
+            stroke(str);
+            fill((col + #FFFFFF) / 2);
+        } else {
+            noStroke();
+        }
 
-         ellipse(xC, yC, curRad*2, curRad*2);
+        ellipse(xC, yC, curRad*2, curRad*2);
     }
 }
 
-class Snake {
-      int x = 0, y = 0, initX = 0, nextNodeX = 0;
-      float speed, ampl, wave;
+class Snake {    
+    int LIFESPAN_REGEN = 500;
+    int AMP_MULTIPLIER = 1;
+
+    int state = STATE_ALIVE;
+    int x = 0, y = 0, initX = 0, nextNodeX = 0;
+    float speed, ampl, wave;
+    int userid;
+    int timeToDie;
       
-      ArrayList nodes = new ArrayList();
-      ArrayList nodeQueue = new ArrayList();
+    ArrayList nodes = new ArrayList();
+    ArrayList nodeQueue = new ArrayList();
 
-      Snake(float speed, float ampl, float wave) {
-                  this.speed = speed;
-                  this.ampl = ampl;
-                  this.wave = wave;
+    Snake(int userid, float speed, float ampl, float wave) {
+        this.userid = userid;
+        this.speed = speed;
+        this.ampl = ampl * AMP_MULTIPLIER;
+        this.wave = wave;
+        this.timeToDie = LIFESPAN_REGEN;
 
-                  initX = Math.random()*Application.getWidth();
-                  y = Math.random()*Application.getHeight();
-      }
+        initX = Math.random()*Application.getWidth();
+        y = Math.random()*Application.getHeight();
+    }
 
-      void addNode(SnakeNode node) {
-           node.x = nextNodeX - node.maxRad;
-           nextNodeX -= node.maxRad * 2;
+    void addNode(SnakeNode node) {
+        node.x = nextNodeX - node.targRad;
+        nextNodeX -= node.targRad * 2;
 
-           nodeQueue.add(node);
-      }
+        nodeQueue.add(node);
+    }
 
-      void update() {
-      if (!nodeQueue.isEmpty()) {
-        Snake nextNode = nodeQueue.get(0);
-        if (nextNode.time < Application.getDisplayTime()) {
-           nodes.add(nextNode);
-           nodeQueue.remove(0);
+    void cleanup() {
+        if (state == STATE_DYING) {
+            boolean alive = false;
+            for (int i = 0; i < nodes.size(); i++) {
+                if (nodes.get(i).state != STATE_DEAD) {
+                    alive = true;
+                }
+            }    
+            if (!alive) {
+                nodes.clear();
+                // This causes segfaults  :(
+                // snakes.remove(userid);
+            }
         }
-}
+    }
+        
+    void update() {
+        move();
 
-          move();
+        if (!nodeQueue.isEmpty()) {
+            Snake nextNode = nodeQueue.get(0);
+            if (nextNode.time < Application.getDisplayTime()) {
+                nodes.add(nextNode);
+                nodeQueue.remove(0);
 
-          for (int i = 0; i < nodes.size(); i++) {
-              nodes.get(i).update();
-          }               
-      }
+                if (state == STATE_ALIVE) {
+                    timeToDie = LIFESPAN_REGEN;
+                }
+            }
+        }
 
-      void move() {
-            x += speed;
-      }
+        if (timeToDie < 0) {
+            for (int i = 0; i < nodes.size(); i++) {
+                nodes.get(i).state = STATE_DYING;
+            }
+            state = STATE_DYING;
+        } else {
+            timeToDie -= Application.DISPLAY_RATE / Application.FPS;
+        }
 
-      void draw() {
-          for (int i = 0; i < nodes.size(); i++) {
-              nodes.get(i).draw();
-          }               
-      }
+        for (int i = 0; i < nodes.size(); i++) {
+            nodes.get(i).update();
+        }               
+    }
+
+    void move() {
+        x += speed;
+    }
+
+    void draw() {
+        for (int i = 0; i < nodes.size(); i++) {
+            nodes.get(i).draw();
+        }               
+    }
 }

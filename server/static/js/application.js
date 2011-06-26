@@ -1,15 +1,17 @@
 function _Application() {
 
     this.FPS = 40;
+    this.DISPLAY_RATE = 50;  // unixtime per second
 
     var PAGE_FETCH_URL = '/data/{start_time}/{end_time}';
     var START_TIME = 1141264807;
     var FETCH_TIME_BUFFER = 1000;
+    var INITIAL_BUFFER = 600;
 
     var _displayTime = START_TIME;
-    var _displayRate = 50;  // unixtime per second
     var _fetchTime = START_TIME - FETCH_TIME_BUFFER;
     var _buffering = false;
+    var _firstLoad = true;
 
     /* Data interface */
 
@@ -30,11 +32,16 @@ function _Application() {
                 var renderer = Processing.getInstanceById('main_canvas');
                 renderer.addSnakeIfNotExists(userid, data.s, data.a, data.w);
                 $.each(data.q, function(idx, query) {
-                        renderer.addSnakeNode(userid, query.t, query.s, query.c, query.c);
+                        renderer.addSnakeNode(userid, query.t, query.s, query.c);
                     });
             });
 
         _buffering = false;
+
+        if (_firstLoad) {
+            _firstLoad = false;
+            _displayTime += INITIAL_BUFFER;
+        }
         $("#loading").hide()
     }
 
@@ -62,7 +69,7 @@ function _Application() {
             pullNextPage();
         }
 
-        _displayTime += _displayRate / this.FPS;
+        _displayTime += this.DISPLAY_RATE / this.FPS;
     }
 
     /* Initialization */
