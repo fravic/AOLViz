@@ -8,6 +8,7 @@
 
     <script src="{{ static_url('js/lib/jquery.min.js') }}"></script>
     <script src="{{ static_url('jquery-ui/js/jquery-ui-1.8.13.custom.min.js') }}"></script>
+    <script src="{{ static_url('js/lib/jquery.hashchange.js') }}"></script>
     <script src="{{ static_url('js/lib/processing-1.2.1.min.js') }}"></script>
     <script src="{{ static_url('js/utils.js') }}"></script>
     <script src="{{ static_url('js/application.js') }}"></script>
@@ -18,6 +19,7 @@
   </head>
   <body>
 
+    <div id="container">
     <canvas id="main_canvas" data-processing-sources="{{ static_url('js/pjs/snakerenderer.pde') }}">
     </canvas>
 
@@ -39,7 +41,7 @@
     </div>
     <div id="time_text">
     </div>
-
+</div>
   </body>
 </html>
 

@@ -15,6 +15,7 @@ function _Application() {
     var _firstLoad = true;
     var _paused = false;
     var _loadingQuery = false;
+    var _ignoreHashChange = false;
     var _lastReset;
 
     var _descOverlayX, _descOverlayY, _descOverlayColor;
@@ -42,6 +43,9 @@ function _Application() {
     function pullNextPage() {
         _fetchTime += FETCH_TIME_BUFFER;
         _buffering = true;
+
+        _ignoreHashChange = true;
+        window.location.hash = _fetchTime;
 
         var url = PAGE_FETCH_URL
             .replace('{start_time}', _fetchTime)
@@ -184,11 +188,16 @@ function _Application() {
                               Application.getHeight());
             }
         });
+
     
     function initApplication() {
-        // For demo purposes, you might want to hardcode a start time
-        var startPerc = Math.floor(Math.random() * 70);
-        var startTime = Math.floor((startPerc/100) * (DATA_END_TIME - DATA_START_TIME) + DATA_START_TIME);
+        if (window.location.hash) {
+            var startTime = parseInt(window.location.hash.slice(1));
+            var startPerc = Math.floor(((_displayTime - DATA_START_TIME) / (DATA_END_TIME - DATA_START_TIME)) * 100);
+        } else {
+            var startPerc = Math.floor(Math.random() * 70);
+            var startTime = Math.floor((startPerc/100) * (DATA_END_TIME - DATA_START_TIME) + DATA_START_TIME);
+        }
 
         setStartTime(startTime);
 
@@ -212,6 +221,15 @@ function _Application() {
                     var time = Math.floor((perc/100) * (DATA_END_TIME - DATA_START_TIME) + DATA_START_TIME);
                     setClockTime(time);
                 }
+            });
+
+        $(window).hashchange(function() {
+                if (_ignoreHashChange) {
+                    _ignoreHashChange = false;
+                    return;
+                }
+                var time = parseInt(window.location.hash.slice(1));
+                setStartTime(time);
             });
     }
 

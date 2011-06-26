@@ -5,8 +5,13 @@ HTML, BODY {
     overflow:hidden;
 }
 
+
 A {
     outline:none;
+}
+
+#container {
+    min-width:1020px;
 }
 
 #main_canvas {
