@@ -20,7 +20,7 @@ class DataServer(object):
     _users = open('../data/question_user_aes')
     for line in _users:
       id, speed, amp, wave = [int(x) for x in line.strip().split('\t')]
-      self.users[id] = {'s':speed, 'a':amp, 'w':wave}
+      self.users[id] = {'s':max(2,speed), 'a':amp, 'w':wave}
     # ids
     self.queries = defaultdict(lambda:defaultdict(lambda:{}))
     _queries = open('../data/question_post_aes')
