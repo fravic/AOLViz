@@ -3,7 +3,7 @@ import sys
 q = open('QUERY_QUERY_DATA')
 q.readline()
 
-arg = sys.argv[0]
+arg = sys.argv[1]
 def color(pos, neg):
   if arg == 'mood':
     if pos > neg and pos > 0:
