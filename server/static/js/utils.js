@@ -26,3 +26,17 @@ function addPoints(a, b) {
 function slog(str) {
     console.log(str);
 }
+
+function capFirst(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function questionify(string) {
+    if (string.charAt(string.length-1) != '?') {
+        return string + '?';
+    }
+}
+
+String.prototype.startsWith = function(str) {
+    return (this.indexOf(str) === 0);
+}
