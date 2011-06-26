@@ -28,12 +28,15 @@ class DataServer(object):
       id, ts, col, size, query  = line.split('\t')
       id = int(id); ts = int(ts); col = int(col); size=int(size)
       self.queries[int(ts)/self._BUCKET].append( (id, ts, col, size, query) )
+    for query in self.queries:
+      print query
 
   def getdata(self, start, end):
     ret = {}
     _start = int(start/self._BUCKET)
     _end = int(ceil(float(end)/self._BUCKET))
-    for i in range(_start, _end+1, self._BUCKET):
+    for i in range(_start, _end+1):
+      print i
       for (id, ts, col, size, _) in self.queries.get(i, []):
         if start < ts and ts < end:
           if not ret.has_key(id):
