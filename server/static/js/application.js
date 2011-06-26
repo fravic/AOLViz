@@ -1,20 +1,41 @@
 function _Application() {
 
     this.FPS = 40;
-    this.DISPLAY_RATE = 100;  // unixtime per second
+    this.DISPLAY_RATE = 200;  // unixtime per second
 
     var PAGE_FETCH_URL = '/data/{start_time}/{end_time}';
     var QUERY_FETCH_URL = '/query/{uid}/{time}';
-    var START_TIME = 1141264807;
-    var FETCH_TIME_BUFFER = 1000;
+    var DATA_START_TIME = 1143000000;
+    var DATA_END_TIME = 1141800000;
+    var FETCH_TIME_BUFFER = 2000;
     var INITIAL_BUFFER = 600;
 
-    var _displayTime = START_TIME;
-    var _fetchTime = START_TIME - FETCH_TIME_BUFFER;
+    var _displayTime, _fetchTime;
     var _buffering = false;
     var _firstLoad = true;
+    var _lastReset;
+
+    var _descOverlayX, _descOverlayY, _descOverlayColor;
 
     /* Data interface */
+
+    function setStartTime(stime) {
+        var minResetInterval = 1000;
+        var time = (new Date()).getTime();
+        if (time - _lastReset < minResetInterval) {
+            return;
+        }
+        _lastReset = time;
+
+        _displayTime = stime;
+        _fetchTime = stime - FETCH_TIME_BUFFER;
+        _buffering = false;
+
+        var renderer = Processing.getInstanceById('main_canvas');
+        if (renderer) {
+            renderer.reset();
+        }
+    }
 
     function pullNextPage() {
         _fetchTime += FETCH_TIME_BUFFER;
@@ -28,6 +49,11 @@ function _Application() {
     }
 
     function pullResponse(response, textStatus) {
+        if (!_buffering) {
+            // Request was interrupted, stop.
+            return;
+        }
+
         response = JSON.parse(response);
         $.each(response, function(userid, data) {
                 var renderer = Processing.getInstanceById('main_canvas');
@@ -50,7 +76,11 @@ function _Application() {
         console.log("Error pulling new data");
     }
 
-    this.showQuery = function(uid, time) {
+    this.showQuery = function(uid, time, xC, yC, color) {
+        _descOverlayX = xC;
+        _descOverlayY = yC;
+        _descOverlayColor = color.slice(2);
+
         var url = QUERY_FETCH_URL
             .replace('{uid}', uid)
             .replace('{time}', time);
@@ -64,12 +94,41 @@ function _Application() {
 
     function queryResponse(response, textStatus) {
         response = JSON.parse(response);
-        slog(response);
+        // Fake some data for now... fill this in later
+        var disp = {text:response};
+        disp.text = capFirst(disp.text);
+
+        $("#desc_overlay").css('left', _descOverlayX + 'px');
+        $("#desc_overlay").css('top', _descOverlayY + 'px');
+        $("#desc_overlay").html(makeQuestionDiv(disp.text));
         $("#desc_overlay").show();
     }
 
     function queryError() {
         console.log("Error loading query");
+    }
+
+    function makeQuestionDiv(string) {
+        // lolol, screw it, I'm tired...
+        string = string.replace('Who', propSurround('Who'));
+        string = string.replace('What', propSurround('What'));
+        string = string.replace('When', propSurround('When'));
+        string = string.replace('Where', propSurround('Where'));
+        string = string.replace('Why', propSurround('Why'));
+        string = string.replace('How', propSurround('How'));
+        string = string.replace('Could', propSurround('Could'));
+        string = string.replace('Should', propSurround('Should'));
+        string = string.replace('Would', propSurround('Would'));
+
+        string = '<div class="qwrap">' + string + '</div>';
+
+        html = $(string);
+        $('.question', html).css('color', "#" + _descOverlayColor);
+        return html;
+    }
+
+    function propSurround(prop) {
+        return '<span class="question">' + prop + '</span>';
     }
 
     /* Rendering functions */
@@ -93,14 +152,35 @@ function _Application() {
         }
 
         _displayTime += this.DISPLAY_RATE / this.FPS;
+        $("#time_slider").slider('value', _displayTime);
     }
 
-    /* Initialization */
-
+    $(window).resize(function() {
+            var renderer = Processing.getInstanceById('main_canvas');
+            if (renderer) {
+                renderer.size(Application.getWidth(),
+                              Application.getHeight());
+            }
+        });
+    
     function initApplication() {
+        // For demo purposes, you might want to hardcode a start time
+        var startTime = Math.floor(Math.random() * (DATA_START_TIME - DATA_END_TIME) + DATA_START_TIME);
+        setStartTime(startTime);
+
+        $("#time_slider").slider({
+                    min:DATA_START_TIME,
+                    max:DATA_END_TIME,
+                    value:startTime,
+                    step:100,
+                    change:function(event, ui) {
+                    setStartTime(ui.value);
+                }
+            });
     }
 
     $(initApplication);
+
 }
 
 var Application = new _Application();
