@@ -1,9 +1,10 @@
 function _Application() {
 
     this.FPS = 40;
-    this.DISPLAY_RATE = 50;  // unixtime per second
+    this.DISPLAY_RATE = 100;  // unixtime per second
 
     var PAGE_FETCH_URL = '/data/{start_time}/{end_time}';
+    var QUERY_FETCH_URL = '/query/{uid}/{time}';
     var START_TIME = 1141264807;
     var FETCH_TIME_BUFFER = 1000;
     var INITIAL_BUFFER = 600;
@@ -47,6 +48,28 @@ function _Application() {
 
     function pullError() {
         console.log("Error pulling new data");
+    }
+
+    this.showQuery = function(uid, time) {
+        var url = QUERY_FETCH_URL
+            .replace('{uid}', uid)
+            .replace('{time}', time);
+                                          
+        $.get(url, {}, queryResponse).error(queryError);
+    }
+
+    this.hideQuery = function() {
+        $("#desc_overlay").hide();
+    }
+
+    function queryResponse(response, textStatus) {
+        response = JSON.parse(response);
+        slog(response);
+        $("#desc_overlay").show();
+    }
+
+    function queryError() {
+        console.log("Error loading query");
     }
 
     /* Rendering functions */
