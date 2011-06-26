@@ -19,6 +19,10 @@ for line in get_files():
     colour = col2[qword[word]-1]
   else:
     colour = col1[qword[word]-1]
-  size = str(int(min(log(len(query), 2),9)))
+  B = str(colour & 255)
+  G = str((colour >> 8) & 255)
+  R = str((colour >> 16) & 255)
+
+  size = str(int(max(1,min(log(len(query), 1.4)-5,9))))
   ts = str(int(time.mktime(time.strptime(ts, '%Y-%m-%d %H:%M:%S'))))
-  print '\t'.join([id,ts,str(colour),size, query])
+  print '\t'.join([id,ts,R,G,B,size, query])

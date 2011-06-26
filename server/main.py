@@ -25,9 +25,9 @@ class DataServer(object):
     self.queries = defaultdict(lambda:[])
     _queries = open('../data/question_post_aes')
     for line in _queries:
-      id, ts, col, size, query  = line.split('\t')
-      id = int(id); ts = int(ts); col = int(col); size=int(size)
-      self.queries[int(ts)/self._BUCKET].append( (id, ts, col, size, query) )
+      id, ts, R, G, B, size, query  = line.split('\t')
+      id = int(id); ts = int(ts); R=int(R); G=int(G); B=int(B); size=int(size)
+      self.queries[int(ts)/self._BUCKET].append( (id, ts, (R,G,B), size, query) )
 
   def getdata(self, start, end):
     ret = {}
