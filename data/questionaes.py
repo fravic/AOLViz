@@ -10,8 +10,8 @@ col2 = [int(x, 16) for x in col2]
 
 PERCENT = {}
 for line in open('data/wc'):
-  word, cnt = line.strip().split('\t')
-  PERCENT[word] = float(cnt) / 1208165
+  word, cnt = line.strip().split()
+  PERCENT[word] = float(cnt) *100 / 184344
 
 for line in get_files():
   if len(line) == 4:
@@ -34,4 +34,4 @@ for line in get_files():
   tokens = query.split(' ')
   percents = [PERCENT[token] for token in tokens]
 
-  print '\t'.join([id,ts,R,G,B,size, query, percents])
+  print '\t'.join([id,ts,R,G,B,size, query, str(percents)])
