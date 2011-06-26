@@ -157,9 +157,14 @@ function _Application() {
         }
 
         _displayTime += this.DISPLAY_RATE / this.FPS;
-        var perc = Math.floor((_displayTime - DATA_START_TIME) / (DATA_END_TIME - DATA_START_TIME));
-        //        $("#time_slider").slider('value', Math.floor(perc*100));
-        var date = new Date(_displayTime*1000);
+        _displayTime = Math.floor(_displayTime);
+        var perc = Math.floor(((_displayTime - DATA_START_TIME) / (DATA_END_TIME - DATA_START_TIME)) * 100);
+        $("#time_slider").slider('value', Math.floor(perc));
+        setClockTime(_displayTime);
+    }
+
+    function setClockTime(time) {
+        var date = new Date(time*1000);
         $("#time_text").html(date.toDateString());
     }
 
@@ -192,6 +197,11 @@ function _Application() {
                     var time = Math.floor((perc/100) * (DATA_END_TIME - DATA_START_TIME) + DATA_START_TIME);
                     setStartTime(time);
                     _paused = false;
+                },
+                slide:function(event, ui) {
+                    var perc = ui.value;
+                    var time = Math.floor((perc/100) * (DATA_END_TIME - DATA_START_TIME) + DATA_START_TIME);
+                    setClockTime(time);
                 }
             });
     }
