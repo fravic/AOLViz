@@ -1,4 +1,4 @@
-q = open('QUESTION_USERS')
+q = open('question_user')
 q.readline()
 
 def speed(time):

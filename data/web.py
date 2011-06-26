@@ -9,7 +9,6 @@ from nltk import wordpunct_tokenize
 from liwc import countcat
 
 URL_RE = re.compile('(.com|www.|http|.net|.gov|.edu)')
-QUESTION_RE = re.compile('(| )')
 
 def isurl(query):
   if URL_RE.search(query):
@@ -18,14 +17,10 @@ def isurl(query):
 
 def isquestion(query):
   tokens = wordpunct_tokenize(query)
-  start = frozenset('when|is|are|can|could|should|would|does|do'.split('|'))
-  any = frozenset('who|what|where|why|how'.split('|'))
+  start = frozenset('when|could|should|would|who|what|where|why|how'.split('|'))
   if tokens[0] in start:
-    return 1
-  for t in tokens:
-    if t in any:
-      return 1
-  return 0
+    return tokens[0]
+  return False
 
 def get_files():
   for line in fileinput.input():
@@ -53,7 +48,7 @@ if __name__ == '__main__':
       npos += counts[0]; nneg += counts[1]; nwords += counts[2]
       # internet competence
       nurl += int(isurl(query))
-      nquest += int(isquestion(query))
+      nquest += 1#int(isquestion(query))
       # repeat queries
       unique.add(query)
       nquery += 1

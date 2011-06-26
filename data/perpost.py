@@ -7,8 +7,8 @@ from web import isurl, isquestion, get_files
 
 print 'id\tts\tpos\tneg\tword\tis_url\tquestion\tclicked'
 for line in get_files():
-  if len(line) == 3:
-    id, query, ts = line
+  if len(line) == 4:
+    id, query, ts, _ = line
     clicked = 1
   else:
     id, query, ts, _, _ = line
@@ -20,7 +20,7 @@ for line in get_files():
   pos = counts[0]; neg = counts[1]; word = counts[2]
   # internet competence
   is_url = int(isurl(query))
-  is_question = int(isquestion(query))
+  is_question = 1
   ts = int(time.mktime(time.strptime(ts, '%Y-%m-%d %H:%M:%S')))
   print '\t'.join([str(x) for x in [id, ts, pos, neg, word, is_url, is_question, clicked]])
 

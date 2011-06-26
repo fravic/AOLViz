@@ -17,23 +17,24 @@ class DataServer(object):
   def __init__(self):
     # users
     self.users = {}
-    _users = open('../data/QUERY_USER_AES')
+    _users = open('../data/question_user_aes')
     for line in _users:
       id, speed, amp, wave = [int(x) for x in line.strip().split('\t')]
       self.users[id] = {'s':speed, 'a':amp, 'w':wave}
     # ids
     self.queries = defaultdict(lambda:[])
-    _queries = open('../data/QUERY_QUERY_AES')
+    _queries = open('../data/question_post_aes')
     for line in _queries:
-      id, ts, R, G, B, size = [int(x) for x in line.split('\t')]
-      self.queries[int(ts)/self._BUCKET].append( (id, ts, (R,G,B), size) )
+      id, ts, col, size, query  = line.split('\t')
+      id = int(id); ts = int(ts); col = int(col); size=int(size)
+      self.queries[int(ts)/self._BUCKET].append( (id, ts, col, size, query) )
 
   def getdata(self, start, end):
     ret = {}
     _start = int(start/self._BUCKET)
     _end = int(ceil(float(end)/self._BUCKET))
     for i in range(_start, _end+1, self._BUCKET):
-      for (id, ts, col, size) in self.queries.get(i, []):
+      for (id, ts, col, size, _) in self.queries.get(i, []):
         if start < ts and ts < end:
           if not ret.has_key(id):
             ret[id] = self.users[id]
