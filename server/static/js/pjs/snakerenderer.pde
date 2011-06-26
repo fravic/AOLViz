@@ -226,7 +226,7 @@ class SnakeNode {
 }
 
 class Snake {    
-    int LIFESPAN_REGEN = 2500;
+    int LIFESPAN_REGEN = 3500;
 
     float AMP_MULTIPLIER = 1.5;
     float SPEED_MULTIPLIER = 0.8;

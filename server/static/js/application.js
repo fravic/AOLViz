@@ -1,7 +1,7 @@
 function _Application() {
 
     this.FPS = 40;
-    this.DISPLAY_RATE = 200;  // unixtime per second
+    this.DISPLAY_RATE = 400;  // unixtime per second
 
     var PAGE_FETCH_URL = '/data/{start_time}/{end_time}';
     var QUERY_FETCH_URL = '/query/{uid}/{time}';
@@ -130,7 +130,7 @@ function _Application() {
         string = string.replace('Should', propSurround('Should'));
         string = string.replace('Would', propSurround('Would'));
 
-        string = '<div class="qwrap">' + string + '</div>';
+        string = '<table class="qwrap"><tr><td valign="middle" class="qwrap">' + string + '</tr></td></table>';
 
         html = $(string);
         $('.question', html).css('color', "#" + _descOverlayColor);
