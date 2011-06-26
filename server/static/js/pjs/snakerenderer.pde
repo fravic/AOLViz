@@ -1,35 +1,3 @@
-// Rounded Corners with Processing.js
-// By F1LT3R - http://groups.google.com/group/processingjs
-void roundedCorners(int left, int top, int width, int height, int roundness) {
-    beginShape();               
-    vertex(left + roundness, top);
-    vertex(left + width - roundness, top);
-    bezierVertex(left + width - roundness, top,
-                 left + width, top,
-                 left + width, top + roundness);
-                          
-    vertex(left + width, top + roundness);
-    vertex(left + width, top + height - roundness);
-    bezierVertex(left + width, top + height - roundness,
-                 left + width, top + height,
-                 left + width - roundness, top + height);
-        
-    vertex(left + width - roundness, top + height);
-    vertex(left + roundness, top + height);        
-    bezierVertex(left + roundness, top + height,
-                 left, top + height,
-                 left, top + height - roundness);
-        
-    vertex(left, top + height - roundness);
-    vertex(left, top + roundness);
-    bezierVertex(left, top + roundness,
-                 left, top,
-                 left + roundness, top);        
-    endShape();
-}
-
-
-
 HashMap snakes = new HashMap();
 
 int STATE_ALIVE = 0;
@@ -50,8 +18,15 @@ void setup() {
     background(#FFFFFF);
 }
 
+void reset() {
+    snakes.clear();
+    setup();
+}
+
 void draw() {
-    Application.update();
+    if (!globalStop) {
+        Application.update();
+    }
 
     background(#FFFFFF);
 
@@ -79,21 +54,56 @@ void draw() {
     if (globalStop) {
         drawGlobalStopNode();
     }
+
+    drawBorder();
 }
 
 void drawGlobalStopNode() {
     const dialogWidth = 300;
-    const dialogHeight = 100;
-    const dialogRounding = 5;
+    const dialogHeight = 80;
+    const dialogRounding = 3;
 
     SnakeNode n = globalStopNode;
+
+    int dialogX = n.xC, dialogY = n.yC;
+    if (dialogX > Application.getWidth() - 270) {
+        dialogX = Application.getWidth() - 270;
+    }
+    if (dialogY > Application.getHeight() - 100) {
+        dialogY = Application.getHeight() - 100;
+    }
 
     fill(#FFFFFF);
     stroke(#000000);
     strokeWeight(1);
-    roundedCorners(n.xC, n.yC, dialogWidth, dialogHeight, dialogRounding);
+    roundedCorners(dialogX, dialogY, dialogWidth, dialogHeight, dialogRounding);
 
     n.draw();
+}
+
+void drawBorder() {
+    const normalBorder = 15;
+    const thickBorder = 30;
+
+    fill(#FFFFFF);
+    noStroke();
+
+    int w = Application.getWidth();
+    int h = Application.getHeight();
+    rect(0, 0, w, normalBorder);
+    rect(0, 0, normalBorder, h);
+    rect(w - normalBorder, 0, normalBorder, h);
+    rect(0, h - thickBorder, w, thickBorder);
+
+    // Uncomment the following for a black border around the stage
+    /*
+    stroke(#000000);
+    line(normalBorder, h - thickBorder, w - normalBorder, h - thickBorder);
+    stroke(#222222);
+    line(normalBorder, normalBorder, normalBorder, h - thickBorder);
+    line(normalBorder, normalBorder, w - normalBorder, normalBorder);
+    line(w - normalBorder, normalBorder, w - normalBorder, h - thickBorder);
+    */
 }
 
 void addSnakeIfNotExists(int id, int speed, int amp, int wave) {
@@ -182,15 +192,25 @@ class SnakeNode {
             fill(col);
         }
 
-        if (mouseOver(xC, yC) && state != STATE_DYING) {
+        if (mouseOver(xC, yC)) {
             strokeWeight(2);
             stroke(#000000);
 
-            Application.showQuery(parent.userid, time);
+            if (!globalStop) {
+                int dialogX = xC, dialogY = yC;
+                if (dialogX > Application.getWidth() - 300) {
+                    dialogX = Application.getWidth() - 300;
+                }
+                if (dialogY > Application.getHeight() - 100) {
+                    dialogY = Application.getHeight() - 100;
+                }
 
-            globalStop = true;
-            globalStopNode = this;
-            parent.state = state = STATE_STOPPED;
+                Application.showQuery(parent.userid, time, dialogX, dialogY, hex(col));
+
+                globalStop = true;
+                globalStopNode = this;
+                parent.state = state = STATE_STOPPED;
+            }
         } else {
             noStroke();
 
@@ -206,11 +226,11 @@ class SnakeNode {
 }
 
 class Snake {    
-    int LIFESPAN_REGEN = 1000;
+    int LIFESPAN_REGEN = 2500;
 
     float AMP_MULTIPLIER = 1.5;
     float SPEED_MULTIPLIER = 0.8;
-    float WAVE_MULTIPLIER = 1.2;
+    float WAVE_MULTIPLIER = 1;
 
     int state = STATE_ALIVE;
     int x = 0, y = 0, initX = 0, nextNodeX = 0;
@@ -247,7 +267,7 @@ class Snake {
                     alive = true;
                 }
             }    
-            if (!alive) {
+            if (!alive) {       
                 nodes.clear();
                 // This causes segfaults  :(
                 // snakes.remove(userid);
@@ -299,4 +319,34 @@ class Snake {
             nodes.get(i).draw();
         }               
     }
+}
+
+// Rounded Corners with Processing.js
+// By F1LT3R - http://groups.google.com/group/processingjs
+void roundedCorners(int left, int top, int width, int height, int roundness) {
+    beginShape();               
+    vertex(left + roundness, top);
+    vertex(left + width - roundness, top);
+    bezierVertex(left + width - roundness, top,
+                 left + width, top,
+                 left + width, top + roundness);
+                          
+    vertex(left + width, top + roundness);
+    vertex(left + width, top + height - roundness);
+    bezierVertex(left + width, top + height - roundness,
+                 left + width, top + height,
+                 left + width - roundness, top + height);
+        
+    vertex(left + width - roundness, top + height);
+    vertex(left + roundness, top + height);        
+    bezierVertex(left + roundness, top + height,
+                 left, top + height,
+                 left, top + height - roundness);
+        
+    vertex(left, top + height - roundness);
+    vertex(left, top + roundness);
+    bezierVertex(left, top + roundness,
+                 left, top,
+                 left + roundness, top);        
+    endShape();
 }

@@ -6,13 +6,14 @@
   <head>
     <title>AOLViz</title>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
+    <script src="{{ static_url('js/lib/jquery.min.js') }}"></script>
     <script src="{{ static_url('jquery-ui/js/jquery-ui-1.8.13.custom.min.js') }}"></script>
     <script src="{{ static_url('js/lib/processing-1.2.1.min.js') }}"></script>
     <script src="{{ static_url('js/utils.js') }}"></script>
     <script src="{{ static_url('js/application.js') }}"></script>
 
     <link rel='stylesheet' href='{{static_url('css/application.css') }}' />
+    <link rel='stylesheet' href='{{static_url('jquery-ui/css/custom-theme/jquery-ui-1.8.13.custom.css') }}' />
 
   </head>
   <body>
@@ -25,14 +26,18 @@
     </div>
 
     <div id="title">
-      <h1>AOL Search Data</h1>
-      <div id="subtitle">
-        <h2>The 2006 Privacy Scandal</h2>
-      </div>
+      <span class="title">QuerySnake</span>
+      <span class="midpoint">&#8226</span>
+      <span class="subtitle"> 2006 AOL Search Data</span>
     </div>
 
     <div id="desc_overlay">
       <span class="question">When</span> did Obama become president?
+    </div>
+
+    <div id="time_slider">
+    </div>
+    <div id="time_text">
     </div>
 
   </body>
